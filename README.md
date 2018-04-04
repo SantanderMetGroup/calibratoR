@@ -15,4 +15,5 @@ install.packages("SpecsVerification")
 ---
 
 **Reference and further information on the methods implemented:** 
+
 Manzanas et al. (2018): 
