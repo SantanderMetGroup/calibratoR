@@ -2,4 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-.calibratoR.Rproj
+.Rbuildignore
+calibratoR.Rproj
