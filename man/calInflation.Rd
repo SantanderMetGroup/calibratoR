@@ -60,7 +60,7 @@ spatialPlot(makeMultiGrid(climatology(obs),
 }
 }
 \seealso{
-\code{\link{calDebias}}, \code{\link{calLM}}, \code{\link{calRPC}}, \code{\link{calNGR}}
+\code{\link{calMVA}}, \code{\link{calLM}}, \code{\link{calRPC}}, \code{\link{calNGR}}
 }
 \author{
 R. Manzanas and V. Torralba.

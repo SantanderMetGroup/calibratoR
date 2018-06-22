@@ -62,7 +62,7 @@ spatialPlot(makeMultiGrid(climatology(obs),
 }
 }
 \seealso{
-\code{\link{calDebias}}, \code{\link{calInflation}}, \code{\link{calLM}}, \code{\link{calRPC}}
+\code{\link{calMVA}}, \code{\link{calInflation}}, \code{\link{calLM}}, \code{\link{calRPC}}
 }
 \author{
 R. Manzanas and J. Bhend.

@@ -36,7 +36,7 @@
 #' \item Torralba, V., F.J. Doblas-Reyes, D. MacLeod, I. Christel, and M. Davis, 2017: Seasonal Climate Prediction: A New Source of Information for the Management of Wind Energy Resources. J. Appl. Meteor. Climatol., 56, 1231–1247, https://doi.org/10.1175/JAMC-D-16-0204.1 
 #' \item Weigel, A.P., M.A. Liniger, and C. Appenzeller, 2009: Seasonal ensemble forecasts: Are recalibrated single models better than multimodels? Mon. Wea. Rev., 137, 1460-1479, https://doi.org/10.1175/2008MWR2773.1
 #' }
-#' @seealso \code{\link{calDebias}}, \code{\link{calLM}}, \code{\link{calRPC}}, \code{\link{calNGR}}
+#' @seealso \code{\link{calMVA}}, \code{\link{calLM}}, \code{\link{calRPC}}, \code{\link{calNGR}}
 #' @author R. Manzanas and V. Torralba.
 #' @examples{
 #' ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
