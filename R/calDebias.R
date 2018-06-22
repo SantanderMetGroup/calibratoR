@@ -71,7 +71,7 @@ calDebias <- function(fcst.grid, obs.grid, crossval = TRUE) {
   fcst.cal = NA*fcst
   for (ilat in 1:nlat) {
     if (!(ilat/10) - trunc(ilat/10)) {
-      print(sprintf("... lat %d of %d ...", ilat, nlat))
+      message(sprintf("... lat %d of %d ...", ilat, nlat))
     }
     for (ilon in 1:nlon) {
       if (crossval) {
