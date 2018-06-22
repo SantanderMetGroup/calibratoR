@@ -1,4 +1,4 @@
-##     calDebias.R Calibration of monthly/seasonal forecasts
+##     calMVA.R Calibration of monthly/seasonal forecasts
 ##
 ##     Copyright (C) 2018 Santander Meteorology Group (http://www.meteo.unican.es)
 ##
@@ -44,7 +44,7 @@
 #' ## interpolating forecasts to the observations' resolution
 #' fcst = interpGrid(fcst, new.coordinates = getGrid(obs))
 #' ## applying calibration
-#' fcst.cal = calDebias(fcst, obs, crossval = TRUE)
+#' fcst.cal = calMVA(fcst, obs, crossval = TRUE)
 #' ## plotting climatologies
 #' library(visualizeR)
 #' spatialPlot(makeMultiGrid(climatology(obs),
@@ -55,7 +55,63 @@
 #'            names.attr = c("NCEP", "CFS (raw)", "CFS (calibrated)"))
 #' }
 
+calMVA <- function(fcst.grid, obs.grid, crossval = TRUE) {
+    ## Method 1 in Torralba et al. 2017: http://www.bsc.es/ESS/sites/default/files/imce/amspaper_final.pdf
+    
+    fcst = fcst.grid$Data
+    obs = obs.grid$Data
+    
+    stopifnot(identical(dim(fcst)[-1], dim(obs)))  # check for equality of dimensions between fcst and obs
+    
+    nmemb = getShape(fcst.grid, "member")
+    ntimes = getShape(fcst.grid, "time")
+    nlat = getShape(fcst.grid, "lat")
+    nlon = getShape(fcst.grid, "lon")
+    
+    fcst.cal = NA*fcst
+    for (ilat in 1:nlat) {
+        if (!(ilat/10) - trunc(ilat/10)) {
+            message(sprintf("... lat %d of %d ...", ilat, nlat))
+        }
+        for (ilon in 1:nlon) {
+            if (crossval) {
+                ## leave-one-out cross-validation
+                aux = sapply(1:ntimes, function(x) {
+                    fcst.train = fcst[,-x,ilat,ilon]
+                    fcst.test = fcst[,x,ilat,ilon]
+                    obs.train = obs[-x,ilat,ilon]
+                    clim.obs = mean(obs.train, na.rm = T)
+                    clim.fcst = mean(fcst.train, na.rm = T)
+                    sigma.e = sd(fcst.train, na.rm = T)
+                    sigma.ref = sd(obs.train, na.rm = T)
+                    
+                    ((fcst.test - clim.fcst) * (sigma.ref/sigma.e)) + clim.obs
+                })
+                fcst.cal[,,ilat,ilon] = aux; rm(aux)
+            } else {
+                fcst.train = fcst[,,ilat,ilon]
+                fcst.test = fcst.train
+                obs.train = obs[,ilat,ilon]
+                clim.obs = mean(obs.train, na.rm = T)
+                clim.fcst = mean(fcst.train, na.rm = T)
+                sigma.e = sd(fcst.train , na.rm = T)
+                sigma.ref = sd(obs.train, na.rm = T)
+                
+                fcst.cal[,,ilat,ilon] = ((fcst.test - clim.fcst)*(sigma.ref/sigma.e)) + clim.obs
+            }
+        }
+    }
+    fcst.out = fcst.grid
+    fcst.out$Data = fcst.cal
+    attributes(fcst.out$Data)$dimensions = attributes(fcst.grid$Data)$dimensions
+    return(fcst.out)
+}
+
+
+
+
 calDebias <- function(fcst.grid, obs.grid, crossval = TRUE) {
+  .Deprecated(new = "calMVA", old = "calDebias")
   ## Method 1 in Torralba et al. 2017: http://www.bsc.es/ESS/sites/default/files/imce/amspaper_final.pdf
   
   fcst = fcst.grid$Data
