@@ -1,4 +1,4 @@
-##     calInlation.R Calibration of monthly/seasonal forecasts
+##     calCCR.R Climate-conserving recalibration of seasonal forecasts
 ##
 ##     Copyright (C) 2018 Santander Meteorology Group (http://www.meteo.unican.es)
 ##
@@ -15,10 +15,10 @@
 ##     You should have received a copy of the GNU General Public License
 ##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#' @title Inflation calibration method for seasonal forecasts
+#' @title Inflation calibration method for seasonal forecasts (a.k.a. climate conserving recalibration)
 #' @description This function implements the EMOS method introduced in Doblas-Reyes et al. 2005
 #' and recently applied in Torralba et al. 2017 (method 2) to produce reliable operational seasonal forecasts of wind speed.
-#' After Weigel et al. 2009, this method is sometimes referred to as climate conserving recalibration.
+#' After Weigel et al. 2009, this method is sometimes referred to as climate conserving recalibration (CCR).
 #' @note Ensemble Model Output Statistics (EMOS) methods use the correspondence between the ensemble mean and the observations in the calibration process.
 #' @param fcst.grid climate4R grid. Forecasts to be calibrated (typically on a monthly/seasonal basis). At the moment, only gridded data are supported.
 #' @param obs.grid climate4R grid. Reference observations the forecasts are calibrated towards (typically on a monthly/seasonal basis).
@@ -48,18 +48,136 @@
 #' ## interpolating forecasts to the observations' resolution
 #' fcst = interpGrid(fcst, new.coordinates = getGrid(obs))
 #' ## applying calibration
-#' fcst.cal = calInflation(fcst, obs, crossval = TRUE, apply.to = "all")
+#' fcst.cal = calCCR(fcst, obs, crossval = TRUE, apply.to = "all")
 #' ## plotting climatologies
 #' library(visualizeR)
 #' spatialPlot(makeMultiGrid(climatology(obs),
-#'                          climatology(fcst, by.member = FALSE),
-#'                          climatology(fcst.cal, by.member = FALSE)),
+#'                           climatology(fcst, by.member = FALSE),
+#'                           climatology(fcst.cal, by.member = FALSE)),
 #'            backdrop.theme = "coastline",
 #'            layout = c(3, 1),
 #'            names.attr = c("NCEP", "CFS (raw)", "CFS (calibrated)"))
 #' }
 
+
+calCCR <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "sig"), alpha = 0.1) {
+    .Deprecated(new = "calCCR", old = "calInflation")
+    ## Method 2 in Torralba et al. 2017: http://www.bsc.es/ESS/sites/default/files/imce/amspaper_final.pdf
+    
+    apply.to = match.arg(apply.to, choices = c("all","sig"))
+    
+    fcst = fcst.grid$Data
+    obs = obs.grid$Data
+    
+    stopifnot(identical(dim(fcst)[-1], dim(obs)))  # check for equality of dimensions between fcst and obs
+    
+    nmemb = getShape(fcst.grid, "member")
+    ntimes = getShape(fcst.grid, "time")
+    nlat = getShape(fcst.grid, "lat")
+    nlon = getShape(fcst.grid, "lon")
+    
+    fcst.cal = NA*fcst
+    for (ilat in 1:nlat) {
+        if (!(ilat/10) - trunc(ilat/10)) {
+            message(sprintf("... lat %d of %d ...", ilat, nlat))
+        }
+        for (ilon in 1:nlon) {
+            tryCatch({
+                if (crossval) {
+                    ## leave-one-out cross-validation
+                    aux = sapply(1:ntimes, function(x) {
+                        fcst.train = fcst[,-x,ilat,ilon]
+                        fcst.test = fcst[,x,ilat,ilon]
+                        obs.train = obs[-x,ilat,ilon]
+                        clim.obs = mean(obs.train, na.rm = T)
+                        obs.train = obs.train - clim.obs
+                        clim.fcst = mean(fcst.train, na.rm = T)          
+                        fcst.train = fcst.train - clim.fcst          
+                        fcst.test = fcst.test - clim.fcst
+                        ens.mean = colMeans(fcst.train, na.rm = T)
+                        sigma.em = sd(ens.mean, na.rm = T)
+                        # sigma.e = mean(apply(fcst.train, 1, sd))
+                        sigma.e = sd(fcst.train - matrix(ens.mean, nrow = nmemb, ncol = ntimes-1, byrow = T), na.rm = T)
+                        sigma.ref = sd(obs.train, na.rm = T)
+                        
+                        rho = cor.test(obs.train, ens.mean, method = "pearson", alternative = "greater")
+                        
+                        if (apply.to == "sig") {
+                            if (rho$p.value < alpha) {  # statistically significant (alpha*100(%)) correlation
+                                a = rho$estimate*(sigma.ref/sigma.em)
+                                b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
+                                
+                                zeta = fcst.test - mean(fcst.test, na.rm = T)
+                                # fcst.cal[,x,ilat,ilon] = (a*(mean(fcst.test, na.rm = T))) + (b*zeta) + clim.obs
+                                (a*(mean(fcst.test, na.rm = T))) + (b*zeta) + clim.obs
+                            } else {
+                                # fcst.cal[,x,ilat,ilon] = fcst.test + clim.fcst
+                                fcst.test + clim.fcst
+                            }
+                        } else if (apply.to == "all") {
+                            a = rho$estimate*(sigma.ref/sigma.em)
+                            b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
+                            
+                            zeta = fcst.test - mean(fcst.test, na.rm = T)
+                            # fcst.cal[,x,ilat,ilon] = (a*(mean(fcst.test, na.rm = T))) + (b*zeta) + clim.obs
+                            (a*(mean(fcst.test, na.rm = T))) + (b*zeta) + clim.obs
+                        }
+                    })
+                    fcst.cal[,,ilat,ilon] = aux; rm(aux)
+                } else {
+                    fcst.train = fcst[,,ilat,ilon]
+                    fcst.test = fcst.train
+                    obs.train = obs[,ilat,ilon]
+                    clim.obs = mean(obs.train, na.rm = T)
+                    obs.train = obs.train - clim.obs
+                    clim.fcst = mean(fcst.train, na.rm = T)
+                    fcst.train = fcst.train - clim.fcst
+                    fcst.test = fcst.test - clim.fcst
+                    ens.mean = colMeans(fcst.train, na.rm = T)
+                    sigma.em = sd(ens.mean, na.rm = T)
+                    # sigma.e = mean(apply(fcst.train, 1, sd))
+                    sigma.e = sd(fcst.train - matrix(ens.mean, nrow = nmemb, ncol = ntimes, byrow = T), na.rm = T)
+                    sigma.ref = sd(obs.train, na.rm = T)
+                    
+                    rho = cor.test(obs.train, ens.mean, method = "pearson", alternative = "greater")
+                    
+                    if (apply.to == "sig") {
+                        if (rho$p.value < alpha) {  # statistically significant (alpha*100(%)) correlation
+                            a = rho$estimate*(sigma.ref/sigma.em)
+                            b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
+                            
+                            zeta = fcst.test - mean(fcst.test, na.rm = T)
+                            fcst.cal[,,ilat,ilon] = (a*(mean(fcst.test, na.rm = T))) + (b*zeta) + clim.obs
+                        } else {
+                            fcst.cal[,,ilat,ilon] = fcst.test + clim.fcst
+                        }
+                    } else if (apply.to == "all") {
+                        a = rho$estimate*(sigma.ref/sigma.em)
+                        b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
+                        
+                        zeta = fcst.test - mean(fcst.test, na.rm = T)
+                        fcst.cal[,,ilat,ilon] = (a*(mean(fcst.test, na.rm = T))) + (b*zeta) + clim.obs
+                    }
+                }
+            }, error = function(x) {
+                # NA data
+            })
+        }
+    }
+    fcst.out = fcst.grid
+    fcst.out$Data = fcst.cal
+    attributes(fcst.out$Data)$dimensions = attributes(fcst.grid$Data)$dimensions
+    return(fcst.out)
+}
+
+
+
+
+
+
+
 calInflation <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "sig"), alpha = 0.1) {
+    .Deprecated(new = "calCCR", old = "calInflation")
   ## Method 2 in Torralba et al. 2017: http://www.bsc.es/ESS/sites/default/files/imce/amspaper_final.pdf
   
   apply.to = match.arg(apply.to, choices = c("all","sig"))
@@ -167,5 +285,9 @@ calInflation <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all
   attributes(fcst.out$Data)$dimensions = attributes(fcst.grid$Data)$dimensions
   return(fcst.out)
 }
+
+
+
+
 
 
