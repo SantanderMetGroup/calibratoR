@@ -61,7 +61,6 @@
 
 
 calCCR <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "sig"), alpha = 0.1) {
-    .Deprecated(new = "calCCR", old = "calInflation")
     ## Method 2 in Torralba et al. 2017: http://www.bsc.es/ESS/sites/default/files/imce/amspaper_final.pdf
     
     apply.to = match.arg(apply.to, choices = c("all","sig"))
@@ -177,7 +176,7 @@ calCCR <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "si
 
 
 calInflation <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "sig"), alpha = 0.1) {
-    .Deprecated(new = "calCCR", old = "calInflation")
+  .Deprecated(new = "calCCR", old = "calInflation")
   ## Method 2 in Torralba et al. 2017: http://www.bsc.es/ESS/sites/default/files/imce/amspaper_final.pdf
   
   apply.to = match.arg(apply.to, choices = c("all","sig"))
