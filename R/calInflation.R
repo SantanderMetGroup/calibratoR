@@ -15,7 +15,7 @@
 ##     You should have received a copy of the GNU General Public License
 ##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#' @title Calibration of seasonal climate forecasts.
+#' @title Inflation calibration method for seasonal forecasts
 #' @description This function implements the EMOS method introduced in Doblas-Reyes et al. 2005
 #' and recently applied in Torralba et al. 2017 (method 2) to produce reliable operational seasonal forecasts of wind speed.
 #' After Weigel et al. 2009, this method is sometimes referred to as climate conserving recalibration.
@@ -77,7 +77,7 @@ calInflation <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all
   fcst.cal = NA*fcst
   for (ilat in 1:nlat) {
     if (!(ilat/10) - trunc(ilat/10)) {
-      print(sprintf("... lat %d of %d ...", ilat, nlat))
+      message(sprintf("... lat %d of %d ...", ilat, nlat))
     }
     for (ilon in 1:nlon) {
       tryCatch({

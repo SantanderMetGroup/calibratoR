@@ -2,7 +2,7 @@
 % Please edit documentation in R/calRPC.R
 \name{calRPC}
 \alias{calRPC}
-\title{Calibration of seasonal climate forecasts.}
+\title{Calibration using the Ratio of Predictable Components for seasonal climate forecasts.}
 \usage{
 calRPC(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "sig"),
   alpha = 0.1)

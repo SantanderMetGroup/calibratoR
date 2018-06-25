@@ -15,7 +15,7 @@
 ##     You should have received a copy of the GNU General Public License
 ##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#' @title Calibration of seasonal climate forecasts.
+#' @title Calibration using the Ratio of Predictable Components for seasonal climate forecasts.
 #' @description This function implements the EMOS method described in Eade et. 2014.
 #' It uses the ensemble to reduce noise and adjust the forecast variance so that the ratio of predictable components (RPC) in the model and in the observations is the same. 
 #' In Eade et al. 2014, this method was used to adjust seasonal forecasts of the North Atlantic Oscillation (NAO), temperature and pressure in the North Atlantic region.
@@ -75,7 +75,7 @@ calRPC <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "si
   fcst.cal = NA*fcst
   for (ilat in 1:nlat) {
     if (!(ilat/10) - trunc(ilat/10)) {
-      print(sprintf("... lat %d of %d ...", ilat, nlat))
+      message(sprintf("... lat %d of %d ...", ilat, nlat))
     }
     for (ilon in 1:nlon) {
       tryCatch({

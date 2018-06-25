@@ -15,7 +15,7 @@
 ##     You should have received a copy of the GNU General Public License
 ##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#' @title Calibration of seasonal climate forecasts.
+#' @title Linear regression based calibration of seasonal climate forecasts
 #' @description This function performs an EMOS-like linear regression between the ensemble mean and the corresponding observations. 
 #' To correct the forecast variance, the standardized anomalies are rescaled by the standard deviation of the predictive distribution from the linear fitting.
 #' @note Ensemble Model Output Statistics (EMOS) methods use the correspondence between the ensemble mean and the observations in the calibration process.
@@ -69,7 +69,7 @@ calLM <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "sig
   fcst.cal = NA*fcst
   for (ilat in 1:nlat) {
     if (!(ilat/10) - trunc(ilat/10)) {
-      print(sprintf("... lat %d of %d ...", ilat, nlat))
+      message(sprintf("... lat %d of %d ...", ilat, nlat))
     }
     for (ilon in 1:nlon) {
       tryCatch({

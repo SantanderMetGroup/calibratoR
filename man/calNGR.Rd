@@ -2,7 +2,7 @@
 % Please edit documentation in R/calNGR.R
 \name{calNGR}
 \alias{calNGR}
-\title{Calibration of seasonal climate forecasts.}
+\title{Non-homogeneous Gaussian Regression calibration for seasonal forecasts}
 \usage{
 calNGR(fcst.grid, obs.grid, crossval = TRUE, type = c("NGR", "ensNGR"),
   apply.to = c("all", "sig"), alpha = 0.1)
@@ -36,6 +36,7 @@ Ensemble Model Output Statistics (EMOS) methods use the correspondence between t
 \examples{
 {
 ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
+require(transformeR)
 data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
 data("NCEP_Iberia_tas"); obs = NCEP_Iberia_tas
 ## passing from daily data to seasonal averages

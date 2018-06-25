@@ -2,7 +2,7 @@
 % Please edit documentation in R/calInflation.R
 \name{calInflation}
 \alias{calInflation}
-\title{Calibration of seasonal climate forecasts.}
+\title{Inflation calibration method for seasonal forecasts}
 \usage{
 calInflation(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all",
   "sig"), alpha = 0.1)

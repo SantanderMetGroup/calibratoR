@@ -2,7 +2,7 @@
 % Please edit documentation in R/calLM.R
 \name{calLM}
 \alias{calLM}
-\title{Calibration of seasonal climate forecasts.}
+\title{Linear regression based calibration of seasonal climate forecasts}
 \usage{
 calLM(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "sig"),
   alpha = 0.1)

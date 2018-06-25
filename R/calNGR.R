@@ -15,7 +15,7 @@
 ##     You should have received a copy of the GNU General Public License
 ##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#' @title Calibration of seasonal climate forecasts.
+#' @title Non-homogeneous Gaussian Regression calibration for seasonal forecasts
 #' @description This function implements an EMOS method that adopts the Non-homogeneous Gaussian Regression (NGR; Gneiting et al. 2005) for use with ensemble forecasts. 
 #' In particular, it uses a constant term and the ensemble mean signal as predictors for the calibrated forecast mean and a constant term and the ensemble spread for the inflation (shrinkage) 
 #' of the ensemble spread. NGR approaches have been applied in many previous works, but mostly in the context of short-term forecasts. 
@@ -42,6 +42,7 @@
 #' @seealso \code{\link{calMVA}}, \code{\link{calInflation}}, \code{\link{calLM}}, \code{\link{calRPC}}
 #' @examples{
 #' ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
+#' require(transformeR)
 #' data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
 #' data("NCEP_Iberia_tas"); obs = NCEP_Iberia_tas
 #' ## passing from daily data to seasonal averages
@@ -90,7 +91,7 @@ calNGR <- function(fcst.grid, obs.grid, crossval = TRUE, type = c("NGR", "ensNGR
   fcst.cal = NA*fcst
   for (ilat in 1:nlat) {
     if (!(ilat/10) - trunc(ilat/10)) {
-      print(sprintf("... lat %d of %d ...", ilat, nlat))
+      message(sprintf("... lat %d of %d ...", ilat, nlat))
     }
     for (ilon in 1:nlon) {
       tryCatch({
