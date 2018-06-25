@@ -51,7 +51,9 @@ spatialPlot(makeMultiGrid(climatology(obs),
 }
 }
 \seealso{
-\code{\link{calInflation}}, \code{\link{calLM}}, \code{\link{calRPC}}, \code{\link{calNGR}}
+Other calibration: \code{\link{calCCR}},
+  \code{\link{calLM}}, \code{\link{calNGR}},
+  \code{\link{calRPC}}
 }
 \author{
 R. Manzanas and V. Torralba.

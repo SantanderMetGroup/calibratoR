@@ -32,7 +32,7 @@
 #' \item Torralba, V., F.J. Doblas-Reyes, D. MacLeod, I. Christel, and M. Davis, 2017: Seasonal Climate Prediction: A New Source of Information for the Management of Wind Energy Resources. J. Appl. Meteor. Climatol., 56, 1231–1247, https://doi.org/10.1175/JAMC-D-16-0204.1 
 #' \item Leung, L.R., A.F. Hamlet, D.P. Lettenmaier, and A. Kumar, 1999: Simulations of the ENSO hydroclimate signals in the Pacific Northwest Columbia River basin. Bull. Amer. Meteor. Soc., 80, 2313–2329, doi:10.1175/1520-0477(1999)080,2313: SOTEHS.2.0.CO;2
 #' }
-#' @seealso \code{\link{calInflation}}, \code{\link{calLM}}, \code{\link{calRPC}}, \code{\link{calNGR}}
+#' @family calibration
 #' @author R. Manzanas and V. Torralba.
 #' @examples{
 #' ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia

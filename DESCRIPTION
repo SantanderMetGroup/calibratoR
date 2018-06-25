@@ -13,8 +13,8 @@ Suggests:
     rmarkdown
 Type: Package
 Title: An R package for statistical calibration of seasonal climate forecasts
-Version: 0.1.0
-Date: 2018-06-22
+Version: 0.1.1
+Date: 2018-06-25
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [cph]",
     "Rodrigo Manzanas <rmanzanas@ifca.unican.es> [aut, cre]",

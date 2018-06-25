@@ -35,7 +35,7 @@
 #' \item Eade R., D. Smith, A. Scaife, et al, 2014: Do seasonal-to-decadal climate predictions underestimate the predictability of the real world? Geophys. Res. Lett., 41(15):5620-5628, doi:10.1002/2014GL061146
 #' }
 #' @author R. Manzanas.
-#' @seealso \code{\link{calMVA}}, \code{\link{calInflation}}, \code{\link{calLM}}, \code{\link{calNGR}}
+#' @family calibration
 #' @examples{
 #' ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
 #' data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas

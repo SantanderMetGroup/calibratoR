@@ -39,7 +39,7 @@
 #' \item Tippett, M.K. and A.G. Barnston, 2008: Skill of Multimodel ENSO Probability Forecasts. Mon. Wea. Rev., 136, 3933–3946, https://doi.org/10.1175/2008MWR2431.1 
 #' }
 #' @author R. Manzanas and J. Bhend.
-#' @seealso \code{\link{calMVA}}, \code{\link{calInflation}}, \code{\link{calLM}}, \code{\link{calRPC}}
+#' @family calibration
 #' @examples{
 #' ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
 #' require(transformeR)

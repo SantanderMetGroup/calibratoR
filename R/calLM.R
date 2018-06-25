@@ -30,7 +30,7 @@
 #' @importFrom stats cor.test lm predict sd	pnorm	
 #' @export
 #' @author R. Manzanas and J. Bhend.
-#' @seealso \code{\link{calMVA}}, \code{\link{calInflation}}, \code{\link{calRPC}}, \code{\link{calNGR}}
+#' @family calibration
 #' @examples{
 #' ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
 #' data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
