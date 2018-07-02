@@ -10,3 +10,8 @@
  * `calInflation` has been deprecated, replaced by `calCCR` (Climate Conserving Recalibration)
  * Replace `print` calls by `message`
  * Other minor doc updates
+
+## v1.0.0 (in devel)
+ * Reimplemented calMVA to support operational forecast correction.
+ * Added parallelization options.
+ * Added new built-in example datasets

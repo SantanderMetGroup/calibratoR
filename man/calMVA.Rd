@@ -4,14 +4,27 @@
 \alias{calMVA}
 \title{Calibration of seasonal climate forecasts.}
 \usage{
-calMVA(fcst.grid, obs.grid, crossval = TRUE)
+calMVA(y, x, newdata = NULL, crossval = TRUE, parallel = FALSE,
+  max.ncores = 16, ncores = NULL)
 }
 \arguments{
-\item{fcst.grid}{climate4R grid. Forecasts to be calibrated (typically on a monthly/seasonal basis). At the moment, only gridded data are supported.}
+\item{y}{climate4R grid. Reference observations the forecasts are calibrated towards (typically on a monthly/seasonal basis).}
 
-\item{obs.grid}{climate4R grid. Reference observations the forecasts are calibrated towards (typically on a monthly/seasonal basis).}
+\item{x}{climate4R grid. Forecasts used as predictors (typically a hindcast on a monthly/seasonal basis).}
 
-\item{crossval}{Logical. TRUE (default) for leave-one-out cross-validation. FALSE for not cross-validation.}
+\item{newdata}{Data to be corrected using the parameters from \code{x}. Typically the operational forecast.
+By default \code{newdata} is \code{NULL}, so the hindcast (\code{x}) is corrected.}
+
+\item{crossval}{Logical. Default to \code{TRUE}, performs a leave-one-year-out cross-validation, so
+the parameters used for the calibration are computed using all years but the current one.
+Unused when an operational forecast is passed to \code{newdata}.}
+
+\item{parallel}{Logical. Should parallel execution be used?}
+
+\item{max.ncores}{Integer. Upper bound for user-defined number of cores.}
+
+\item{ncores}{Integer number of cores used in parallel computation. Self-selected number of
+cores is used when \code{ncpus = NULL} (the default), or when \code{maxcores} exceeds the default \code{ncores} value.}
 }
 \value{
 climate4R grid. Calibrated forecasts.
@@ -22,8 +35,25 @@ in the context of seasonal forecasting to correct temperature and precipitation 
 The ensemble mean produced by this method has the same mean and standard deviation as the observations. 
 It is based on the assumption that both the reference and predicted distributions are approximated well by a Gaussian (normal) distribution.
 }
+\section{Parallel Processing}{
+
+
+Parallel processing is enabled using the \pkg{parallel} package. 
+Parallelization is undertaken by a FORK-type parallel socket cluster formed by \code{ncores}.
+If \code{ncores} is not specified (default), \code{ncores} will be one less than the autodetected number of cores.
+The maximum number of cores used for parallel processing can be set with the \code{max.ncores} argument, 
+although this will be reset to the auto-detected number of cores minus 1 if this number is exceeded. Note that not all 
+code, but just some critical loops within the function are parallelized.
+
+In practice, parallelization does not always result in smaller execution times, due to the parallel overhead.
+However, parallel computing may potentially provide a significant speedup for the 
+particular case of large multimember datasets or large grids.
+ 
+Parallel computing is currently not available for Windows machines.
+}
+
 \examples{
-{
+\dontrun{
 ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
 data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
 data("NCEP_Iberia_tas"); obs = NCEP_Iberia_tas
