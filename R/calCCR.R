@@ -20,16 +20,21 @@
 #' and recently applied in Torralba et al. 2017 (method 2) to produce reliable operational seasonal forecasts of wind speed.
 #' After Weigel et al. 2009, this method is sometimes referred to as climate conserving recalibration (CCR).
 #' @note Ensemble Model Output Statistics (EMOS) methods use the correspondence between the ensemble mean and the observations in the calibration process.
-#' @param fcst.grid climate4R grid. Forecasts to be calibrated (typically on a monthly/seasonal basis). At the moment, only gridded data are supported.
-#' @param obs.grid climate4R grid. Reference observations the forecasts are calibrated towards (typically on a monthly/seasonal basis).
-#' @param crossval Logical. TRUE (default) for leave-one-out cross-validation. FALSE for not cross-validation.
+#' @template templateInputPars
 #' @param apply.to Character. If \code{"all"} is selected, all forecasts are calibrated. Alternatively, if \code{"sig"} is selected, the calibration is only applied 
-#' in those points where the correlation between the ensemble mean and the observations is statistically significant.
+#' in those points where the correlation between the ensemble mean and the observations is statistically significant. This correlation
+#' is computed upong the hindcast ensemble mean and the reference observations.
 #' @param alpha Significance (0.1 by default) of the ensemble mean correlation (i.e. \code{"alpha = 0.05"} would correspond to a 95\% confidence level). Only works if \code{"apply.to = sig"}.
-#' @return climate4R grid. Calibrated forecasts.
+#' Note that the global correlation analysis will be skipped when \code{apply.to = "all"}.
+#' @param detrend In case the correlation significance test is undertaken, should the data be (linearly) detrended first?
+#' Detrending is internally achieved by \code{\link{detrendGrid}}.
+#' @template templateParallelParams
+#' @template templateParallel
+#' @return A climate4R grid of calibrated forecasts
 #' @importFrom transformeR getShape
 #' @importFrom stats cor.test sd
 #' @importFrom magrittr %>% extract2 extract multiply_by
+#' @importFrom easyVerification veriApply
 #' @export
 #' @references
 #' \itemize{
@@ -39,44 +44,25 @@
 #' }
 #' @family calibration
 #' @author R. Manzanas and V. Torralba.
-#' @examples{
-#' ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
-#' data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
-#' data("NCEP_Iberia_tas"); obs = NCEP_Iberia_tas
-#' ## passing from daily data to seasonal averages
-#' fcst = aggregateGrid(fcst, aggr.y = list(FUN = "mean", na.rm = TRUE))
-#' obs = aggregateGrid(obs, aggr.y = list(FUN = "mean", na.rm = TRUE))
-#' ## interpolating forecasts to the observations' resolution
-#' fcst = interpGrid(fcst, new.coordinates = getGrid(obs))
-#' ## applying calibration
-#' fcst.cal = calCCR(fcst, obs, crossval = TRUE, apply.to = "all")
-#' ## plotting climatologies
-#' library(visualizeR)
-#' spatialPlot(makeMultiGrid(climatology(obs),
-#'                           climatology(fcst, by.member = FALSE),
-#'                           climatology(fcst.cal, by.member = FALSE)),
-#'            backdrop.theme = "coastline",
-#'            layout = c(3, 1),
-#'            names.attr = c("NCEP", "CFS (raw)", "CFS (calibrated)"))
-#' }
+#' 
 
 
-
-load("data/cfs.forecast.rda", verbose = TRUE)
-load("data/cfs.hindcast.rda", verbose = TRUE)
-load("data/ncep.ref.rda", verbose = TRUE)
-
-y <- ncep.ref
-x <- cfs.hindcast
-newdata <- cfs.forecast
-newdata <- NULL
-crossval = TRUE
-apply.to = "all"
-alpha = 0.1
-parallel = TRUE
-max.ncores = 16
-ncores = 2
-detrend = TRUE
+# 
+# load("data/cfs.forecast.rda", verbose = TRUE)
+# load("data/cfs.hindcast.rda", verbose = TRUE)
+# load("data/ncep.ref.rda", verbose = TRUE)
+# 
+# y <- ncep.ref
+# x <- cfs.hindcast
+# newdata <- cfs.forecast
+# # newdata <- NULL
+# crossval = TRUE
+# apply.to = "all"
+# alpha = 0.1
+# parallel = TRUE
+# max.ncores = 16
+# ncores = 2
+# detrend = FALSE
 
 calCCR <- function(y, x, newdata = NULL, crossval = TRUE,
                    detrend = TRUE, apply.to = "all", alpha = 0.1,
@@ -94,27 +80,29 @@ calCCR <- function(y, x, newdata = NULL, crossval = TRUE,
     x.coords <- coords$x
     y.coords <- coords$y
     n.points <- ifelse(typeofGrid(y) == "station", nrow(coords), length(x.coords) * length(y.coords))
-    if (detrend) {
-        message("[", Sys.time(), "] Detrending ...")
-        xrho <- suppressMessages(detrendGrid(grid = x, parallel = parallel, ncores = ncores))
-        yrho <- suppressMessages(detrendGrid(grid = y, parallel = parallel, ncores = ncores)) 
-    } else {
-        xrho <- x
-        yrho <- y %>% redim(member = FALSE)
+    if (apply.to == "sig") {
+        if (detrend) {
+            message("[", Sys.time(), "] Detrending ...")
+            xrho <- suppressMessages(detrendGrid(grid = x, parallel = parallel, ncores = ncores))
+            yrho <- suppressMessages(detrendGrid(grid = y, parallel = parallel, ncores = ncores)) 
+        } else {
+            xrho <- x
+            yrho <- y %>% redim(member = FALSE)
+        }
+        # Correlation is applied to (optionally detrended) x and y.
+        message("[", Sys.time(), "] Calculating ensemble mean vs. obs correlation ...")
+        rho.pval <- suppressMessages(veriApply(verifun = "corfun",
+                                               method = "pearson",
+                                               alternative = "greater",
+                                               fcst = xrho$Data,
+                                               obs = yrho$Data,
+                                               tdim = 2,
+                                               ensdim = 1,
+                                               parallel = parallel,
+                                               ncpus = ncores)) %>% extract2("pval") %>% easyVeri2grid(obs.grid = yrho,
+                                                                                                       verifun = "calibratoR:::corfun") %>% extract2("Data") %>% array3Dto2Dmat() %>% extract(1,)
+        xrho <- yrho <- NULL
     }
-    # Correlation is applied to (optionally detrended) x and y.
-    message("[", Sys.time(), "] Calculating correlation ...")
-    rho.pval <- suppressMessages(veriApply(verifun = "corfun",
-                                           method = "pearson",
-                                           alternative = "greater",
-                                           fcst = xrho$Data,
-                                           obs = yrho$Data,
-                                           tdim = 2,
-                                           ensdim = 1,
-                                           parallel = parallel,
-                                           ncpus = ncores)) %>% extract2("pval") %>% easyVeri2grid(obs.grid = yrho,
-                                                                                                   verifun = "calibratoR:::corfun") %>% extract2("Data") %>% array3Dto2Dmat() %>% extract(1,)
-    xrho <- yrho <- NULL
     ind <- if (apply.to == "all") {
         1:n.points
     } else {
@@ -126,13 +114,14 @@ calCCR <- function(y, x, newdata = NULL, crossval = TRUE,
     }
     rho.pval <- NULL
     if (crossval) {
+        message("[", Sys.time(), "] Calculating parameters (leave-one-year out cross-validation mode) ...")
         x <- NULL
         ppars <- parallelCheck(parallel = parallel, max.ncores = max.ncores, ncores = ncores)
         lapplyfun <- selectPar.pplyFun(parallel.pars = ppars, .pplyFUN = "lapply")
         if (ppars$hasparallel) on.exit(parallel::stopCluster(ppars$cl))
-        if (ppars$hasparallel) on.exit(parallel::stopCluster(ppars$cl))
         yrs <- getYearsAsINDEX(newdata) %>% unique()
         l1 <- lapplyfun(yrs, function(j) {
+            message("[", Sys.time(), "] Taking out ", j, " (", yrs[length(yrs)] - j, " years remaining ...)")
             yr.ind <- setdiff(yrs, j)
             obs.train <- subsetGrid(y, years = yr.ind) 
             clim.obs <- suppressMessages(climatology(obs.train) %>% extract2("Data") %>% array3Dto2Dmat() %>% extract(1,))
@@ -158,10 +147,12 @@ calCCR <- function(y, x, newdata = NULL, crossval = TRUE,
             a <- rho * (sigma.ref/sigma.e)
             b <- sqrt(1 - rho^2) * (sigma.ref/sigma.em)
             clim.test <- suppressMessages(climatology(f.test, by.member = FALSE) %>% extract2("Data") %>% array3Dto2Dmat() %>% extract(1, ))
-                aux1 <- f.train
+            aux1 <- f.train
             l <- lapply(1:n.mem, function(i) {
                 z <- subsetGrid(f.train, members = i) %>% extract2("Data") %>% array3Dto2Dmat() %>% t()
-                aux1$Data <- (a * clim.test + (b * z) + clim.obs) %>% t() %>% mat2Dto3Darray(x = x.coords, y = y.coords)  
+                z[ind, ] <- (a * clim.test + (b * z) + clim.obs) %>% extract(ind, )
+                # aux1$Data <- (a * clim.test + (b * z) + clim.obs) %>% t() %>% mat2Dto3Darray(x = x.coords, y = y.coords)  
+                aux1$Data <- mat2Dto3Darray(t(z), x = x.coords, y = y.coords)  
                 return(aux1)
             })
             return(do.call("bindGrid", c(l, dimension = "member")))
@@ -169,6 +160,7 @@ calCCR <- function(y, x, newdata = NULL, crossval = TRUE,
         y <- newdata <- NULL
         cal <- do.call("bindGrid", c(l1, dimension = "time")) %>% redim(drop = TRUE)
     } else {
+        message("[", Sys.time(), "] Calculating parameters ...")
         clim.obs <- suppressMessages(climatology(y) %>% extract2("Data") %>% array3Dto2Dmat() %>% extract(1,))
         obs.train <- suppressMessages(scaleGrid(y, time.frame = "monthly") %>% redim(drop = TRUE) %>% redim(member = FALSE))
         sigma.ref <- getPooledMemberStat(obs.train, fun = "sd", na.rm = TRUE)
@@ -177,7 +169,8 @@ calCCR <- function(y, x, newdata = NULL, crossval = TRUE,
         ens.mean <- suppressMessages(aggregateGrid(f.train, aggr.mem = list(FUN = "mean", na.rm = TRUE)))
         sigma.em <- getPooledMemberStat(ens.mean, fun = "sd", na.rm = TRUE)
         # Sospechoso: (anomalias de anomalias...)
-        sigma.e <- suppressMessages(scaleGrid(f.train, base = ens.mean) %>% getPooledMemberStat(fun = "sd", na.rm = TRUE))
+        # sigma.e <- suppressMessages(scaleGrid(f.train, base = ens.mean) %>% getPooledMemberStat(fun = "sd", na.rm = TRUE))
+        sigma.e <- getPooledMemberStat(grid = f.train, fun = "sd", na.rm = TRUE)
         rho <- suppressMessages(veriApply(verifun = "corfun",
                                           method = "pearson", alternative = "greater",
                                           fcst = f.train$Data,
@@ -189,20 +182,25 @@ calCCR <- function(y, x, newdata = NULL, crossval = TRUE,
                                                                                                          verifun = "calibratoR:::corfun") %>% extract2("Data") %>% array3Dto2Dmat() %>% extract(1,)
         a <- rho * (sigma.ref/sigma.e)
         b <- sqrt(1 - rho^2) * (sigma.ref/sigma.em)
+        clim.test <- suppressMessages(climatology(f.test, by.member = FALSE) %>% extract2("Data") %>% array3Dto2Dmat() %>% extract(1, ))
         aux1 <- f.test
-        l <- lapply(1:n.mem, function(i) {
+        message("[", Sys.time(), "] Applying calibration ...")
+        ppars <- parallelCheck(parallel, max.ncores, ncores)
+        lapplyfun <- selectPar.pplyFun(parallel.pars = ppars, .pplyFUN = "lapply")
+        if (ppars$hasparallel) on.exit(parallel::stopCluster(ppars$cl))
+        l <- lapplyfun(1:n.mem, function(i) {
             z <- subsetGrid(f.test, members = i) %>% extract2("Data") %>% array3Dto2Dmat() %>% t()
-            aux1$Data <- (a * clim.test + (b * z) + clim.obs) %>% t() %>% mat2Dto3Darray(x = x.coords, y = y.coords)  
+            z[ind, ] <- (a * clim.test + (b * z) + clim.obs) %>% extract(ind, )
+            aux1$Data <- mat2Dto3Darray(t(z), x = x.coords, y = y.coords)  
             return(aux1)
         })
         cal <- do.call("bindGrid", c(l, dimension = "member"))
     }
     message("[", Sys.time(), "] Done.")
+    if (length(unique(cal$Members)) != n.mem) cal$Members <- paste0("Member_", 1:n.mem)
     return(cal)
 }
     
-
-
     
 #' @keywords internal
     
@@ -365,7 +363,7 @@ calInflation <- function(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all
             
             if (apply.to == "sig") {
               if (rho$p.value < alpha) {  # statistically significant (alpha*100(%)) correlation
-                a = rho$estimay m,t − ȳ tte*(sigma.ref/sigma.em)
+                a = rho$estimate*(sigma.ref/sigma.em)
                 b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
                 
                 zeta = fcst.test - mean(fcst.test, na.rm = T)
