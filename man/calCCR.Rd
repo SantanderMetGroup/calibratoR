@@ -4,23 +4,41 @@
 \alias{calCCR}
 \title{Inflation calibration method for seasonal forecasts (a.k.a. climate conserving recalibration)}
 \usage{
-calCCR(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "sig"),
-  alpha = 0.1)
+calCCR(y, x, newdata = NULL, crossval = TRUE, detrend = TRUE,
+  apply.to = "all", alpha = 0.1, parallel = FALSE, max.ncores = 16,
+  ncores = NULL)
 }
 \arguments{
-\item{fcst.grid}{climate4R grid. Forecasts to be calibrated (typically on a monthly/seasonal basis). At the moment, only gridded data are supported.}
+\item{y}{climate4R grid. Reference observations the forecasts are calibrated towards (typically on a monthly/seasonal basis).}
 
-\item{obs.grid}{climate4R grid. Reference observations the forecasts are calibrated towards (typically on a monthly/seasonal basis).}
+\item{x}{climate4R grid. Forecasts used as predictors (typically a hindcast on a monthly/seasonal basis).}
 
-\item{crossval}{Logical. TRUE (default) for leave-one-out cross-validation. FALSE for not cross-validation.}
+\item{newdata}{Data to be corrected using the parameters from \code{x}. Typically the operational forecast.
+By default \code{newdata} is \code{NULL}, so the hindcast (\code{x}) is corrected.}
+
+\item{crossval}{Logical. Default to \code{TRUE}, performs a leave-one-year-out cross-validation, so
+the parameters used for the calibration are computed using all years but the current one.
+Unused when an operational forecast is passed to \code{newdata}.}
+
+\item{detrend}{In case the correlation significance test is undertaken, should the data be (linearly) detrended first?
+Detrending is internally achieved by \code{\link{detrendGrid}}.}
 
 \item{apply.to}{Character. If \code{"all"} is selected, all forecasts are calibrated. Alternatively, if \code{"sig"} is selected, the calibration is only applied 
-in those points where the correlation between the ensemble mean and the observations is statistically significant.}
+in those points where the correlation between the ensemble mean and the observations is statistically significant. This correlation
+is computed upong the hindcast ensemble mean and the reference observations.}
 
-\item{alpha}{Significance (0.1 by default) of the ensemble mean correlation (i.e. \code{"alpha = 0.05"} would correspond to a 95\% confidence level). Only works if \code{"apply.to = sig"}.}
+\item{alpha}{Significance (0.1 by default) of the ensemble mean correlation (i.e. \code{"alpha = 0.05"} would correspond to a 95\% confidence level). Only works if \code{"apply.to = sig"}.
+Note that the global correlation analysis will be skipped when \code{apply.to = "all"}.}
+
+\item{parallel}{Logical. Should parallel execution be used?}
+
+\item{max.ncores}{Integer. Upper bound for user-defined number of cores.}
+
+\item{ncores}{Integer number of cores used in parallel computation. Self-selected number of
+cores is used when \code{ncpus = NULL} (the default), or when \code{maxcores} exceeds the default \code{ncores} value.}
 }
 \value{
-climate4R grid. Calibrated forecasts.
+A climate4R grid of calibrated forecasts
 }
 \description{
 This function implements the EMOS method introduced in Doblas-Reyes et al. 2005
@@ -30,28 +48,23 @@ After Weigel et al. 2009, this method is sometimes referred to as climate conser
 \note{
 Ensemble Model Output Statistics (EMOS) methods use the correspondence between the ensemble mean and the observations in the calibration process.
 }
-\examples{
-{
-## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
-data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
-data("NCEP_Iberia_tas"); obs = NCEP_Iberia_tas
-## passing from daily data to seasonal averages
-fcst = aggregateGrid(fcst, aggr.y = list(FUN = "mean", na.rm = TRUE))
-obs = aggregateGrid(obs, aggr.y = list(FUN = "mean", na.rm = TRUE))
-## interpolating forecasts to the observations' resolution
-fcst = interpGrid(fcst, new.coordinates = getGrid(obs))
-## applying calibration
-fcst.cal = calCCR(fcst, obs, crossval = TRUE, apply.to = "all")
-## plotting climatologies
-library(visualizeR)
-spatialPlot(makeMultiGrid(climatology(obs),
-                          climatology(fcst, by.member = FALSE),
-                          climatology(fcst.cal, by.member = FALSE)),
-           backdrop.theme = "coastline",
-           layout = c(3, 1),
-           names.attr = c("NCEP", "CFS (raw)", "CFS (calibrated)"))
+\section{Parallel Processing}{
+
+
+Parallel processing is enabled using the \pkg{parallel} package. 
+Parallelization is undertaken by a FORK-type parallel socket cluster formed by \code{ncores}.
+If \code{ncores} is not specified (default), \code{ncores} will be one less than the autodetected number of cores.
+The maximum number of cores used for parallel processing can be set with the \code{max.ncores} argument, 
+although this will be reset to the auto-detected number of cores minus 1 if this number is exceeded. Note that not all 
+code, but just some critical loops within the function are parallelized.
+
+In practice, parallelization does not always result in smaller execution times, due to the parallel overhead.
+However, parallel computing may potentially provide a significant speedup for the 
+particular case of large multimember datasets or large grids.
+ 
+Parallel computing is currently not available for Windows machines.
 }
-}
+
 \references{
 \itemize{
 \item Doblas-Reyes, F.J., R. Hagedorn, and T.N. Palmer, 2005: The rationale behind the success of multi-model ensembles in seasonal forecasting-II. Calibration and combination. Tellus, 57A, 234–252, doi:10.3402/tellusa.v57i3.14658

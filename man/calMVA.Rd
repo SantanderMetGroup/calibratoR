@@ -54,24 +54,19 @@ Parallel computing is currently not available for Windows machines.
 
 \examples{
 \dontrun{
-## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
-data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
-data("NCEP_Iberia_tas"); obs = NCEP_Iberia_tas
-## passing from daily data to seasonal averages
-fcst = aggregateGrid(fcst, aggr.y = list(FUN = "mean", na.rm = TRUE))
-obs = aggregateGrid(obs, aggr.y = list(FUN = "mean", na.rm = TRUE))
-## interpolating forecasts to the observations' resolution
-fcst = interpGrid(fcst, new.coordinates = getGrid(obs))
-## applying calibration
-fcst.cal = calMVA(fcst, obs, crossval = TRUE)
-## plotting climatologies
-library(visualizeR)
-spatialPlot(makeMultiGrid(climatology(obs),
-                         climatology(fcst, by.member = FALSE),
-                         climatology(fcst.cal, by.member = FALSE)),
-           backdrop.theme = "coastline",
-           layout = c(3, 1),
-           names.attr = c("NCEP", "CFS (raw)", "CFS (calibrated)"))
+require(transformeR)
+require(visualizeR)
+data(list = c("cfs.forecast", "cfs.hindcast", "ncep.ref"), package = "calibratoR")
+# Leave-one-year-out cross validation is preformed by default ...
+cal1 <- calMVA(y = ncep.ref, x = cfs.hindcast)
+#  ... unless explicitly disabled:
+cal2 <- calMVA(y = ncep.ref, x = cfs.hindcast, crossval = FALSE)
+mg <- makeMultiGrid(climatology(ncep.ref),
+                    climatology(cfs.hindcast, by.member = FALSE),
+                    climatology(cal1, by.member = FALSE),
+                    climatology(cal2, by.member = FALSE))
+spatialPlot(mg, names.attr = c("NCEP", "CFSv2_RAW", "CFSv2_MVA_CV", "CFSv2_MVA"), rev.colors = TRUE)
+cal <- calMVA(y = ncep.ref, x = cfs.hindcast, newdata = cfs.forecast)
 }
 }
 \references{

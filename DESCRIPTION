@@ -5,6 +5,7 @@ Depends:
 Imports:
     stats,
     SpecsVerification,
+    easyVerification,
     abind,
     magrittr
 Suggests:
@@ -16,14 +17,14 @@ Suggests:
 Type: Package
 Title: An R package for statistical calibration of seasonal climate forecasts
 Version: 1.0.0
-Date: 2018-07-02
+Date: 2018-07-09
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [cph]",
     "Rodrigo Manzanas <rmanzanas@ifca.unican.es> [aut, cre]",
     "José Manuel Gutiérrez <gutierjm@unican.es> [ctb]",
     "Jonas Bhend <Jonas.Bhend@meteoswiss.ch> [aut]",
     "Verónica Torralba <veronica.torralba@bsc.es> [aut]",
-    "Joaquín Bedia <bediaj@unican.es> [ctb]",
+    "Joaquín Bedia <bediaj@unican.es> [aut]",
     "Maialen Iturbide <miturbide@ifca.unican.es> [ctb]"))
 BugReports: https://github.com/SantanderMetGroup/calibratoR/issues
 URL: https://github.com/SantanderMetGroup/calibratoR

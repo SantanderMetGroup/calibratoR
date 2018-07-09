@@ -4,17 +4,20 @@
 \alias{getPooledMemberStat}
 \title{Get pooled-member local statistics}
 \usage{
-getPooledMemberStat(grid, fun, ...)
+getPooledMemberStat(grid, fun, dim.along = "latlon", ...)
 }
 \arguments{
 \item{grid}{A climate4R CDM structure}
 
 \item{fun}{Character string. Currently in use \code{"mean"} or \code{"sd"}, but any other valid function may work.}
 
+\item{dim.along}{Dimension to pool along. Default to \code{"latlon"}. Otherwise \code{"time"}}
+
 \item{...}{Further args passed to \code{fun}}
 }
 \value{
-A vector, in the appropriate coordinates ordering (consistent with \code{\link{array3Dto2Dmat}})
+A vector, in the appropriate coordinates ordering (consistent with \code{\link[transformeR]{array3Dto2Dmat}} in the case of
+spatial aggregations or \code{\link[transformeR]{getRefDates}} in the case of time aggregations).
 }
 \description{
 Retrieve statistics for each grid point by pooling together all members
