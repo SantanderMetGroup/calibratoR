@@ -11,7 +11,7 @@
  * Replace `print` calls by `message`
  * Other minor doc updates
 
-## v1.0.0 (in devel)
+## v1.0.0 (10 Jul 2018)
  * Reimplemented `calMVA` and `calCCR` to support operational forecast correction.
- * Added parallelization options.
+ * Added parallelization options in `calMVA`.
  * Added new built-in example datasets

@@ -56,7 +56,15 @@ prepareCalInputs <- function(x, y, newdata, crossval) {
 
 
 #' @importFrom stats cor.test
+#' @title Ensemble Correlation
+#' @description Ensemble correlation helper
+#' @param ens ens
+#' @param obs obs
+#' @details For internal usage only, although exported for convenience
 #' @keywords internal
+#' @importFrom stats cor.test
+#' @param ... further argumentspassed to \code{\link[stats]{cor.test}}
+#' @export
 
 corfun <- function(ens, obs, ...) {
     ctest <- cor.test(x = obs, y = rowMeans(ens), ...)
