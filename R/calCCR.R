@@ -164,6 +164,7 @@ calCCR <- function(fcst.grid, obs.grid, newfcst.grid = NULL, crossval = TRUE, ap
                             zeta = fcst.test - mean(fcst.test, na.rm = T)
                             fcst.cal[,,ilat,ilon] = (a*(mean(fcst.test, na.rm = T))) + (b*zeta) + clim.obs
                         }
+                        fcst.out = fcst.grid
                     }
                 }, error = function(x) {
                     # NA data
