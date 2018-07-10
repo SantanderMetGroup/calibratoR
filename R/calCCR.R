@@ -68,7 +68,7 @@
 calCCR <- function(fcst.grid, obs.grid, newfcst.grid = NULL, crossval = TRUE, apply.to = c("all", "sig"), alpha = 0.1) {
     ## Torralba et al. 2017: http://www.bsc.es/ESS/sites/default/files/imce/amspaper_final.pdf
     
-    apply.method = match.arg(apply.method, choices = c("all","sig"))
+    apply.to = match.arg(apply.to, choices = c("all","sig"))
     
     fcst = fcst.grid$Data
     obs = obs.grid$Data
@@ -84,7 +84,7 @@ calCCR <- function(fcst.grid, obs.grid, newfcst.grid = NULL, crossval = TRUE, ap
         fcst.cal = NA*fcst
         for (ilat in 1:nlat) {
             if (!(ilat/10) - trunc(ilat/10)) {
-                print(sprintf("... lat %d of %d ...", ilat, nlat))
+                #print(sprintf("... lat %d of %d ...", ilat, nlat))
             }
             for (ilon in 1:nlon) {
                 tryCatch({
@@ -107,7 +107,7 @@ calCCR <- function(fcst.grid, obs.grid, newfcst.grid = NULL, crossval = TRUE, ap
                             
                             rho = cor.test(obs.train, ens.mean, method = "pearson", alternative = "greater")
                             
-                            if (apply.method == "sig") {
+                            if (apply.to == "sig") {
                                 if (rho$p.value < alpha) {  #rho significativa a una confianza del alpha*100(%)
                                     a = rho$estimate*(sigma.ref/sigma.em)
                                     b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
@@ -119,7 +119,7 @@ calCCR <- function(fcst.grid, obs.grid, newfcst.grid = NULL, crossval = TRUE, ap
                                     # fcst.cal[,x,ilat,ilon] = fcst.test + clim.fcst
                                     fcst.test + clim.fcst
                                 }
-                            } else if (apply.method == "all") {
+                            } else if (apply.to == "all") {
                                 a = rho$estimate*(sigma.ref/sigma.em)
                                 b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
                                 
@@ -147,7 +147,7 @@ calCCR <- function(fcst.grid, obs.grid, newfcst.grid = NULL, crossval = TRUE, ap
                         
                         rho = cor.test(obs.train, ens.mean, method = "pearson", alternative = "greater")
                         
-                        if (apply.method == "sig") {
+                        if (apply.to == "sig") {
                             if (rho$p.value < alpha) {  #rho significativa a una confianza del alpha*100(%)
                                 a = rho$estimate*(sigma.ref/sigma.em)
                                 b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
@@ -157,7 +157,7 @@ calCCR <- function(fcst.grid, obs.grid, newfcst.grid = NULL, crossval = TRUE, ap
                             } else {
                                 fcst.cal[,,ilat,ilon] = fcst.test + clim.fcst
                             }
-                        } else if (apply.method == "all") {
+                        } else if (apply.to == "all") {
                             a = rho$estimate*(sigma.ref/sigma.em)
                             b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
                             
@@ -198,7 +198,7 @@ calCCR <- function(fcst.grid, obs.grid, newfcst.grid = NULL, crossval = TRUE, ap
                     
                     rho = cor.test(obs.train, ens.mean, method = "pearson", alternative = "greater")
                     
-                    if (apply.method == "sig") {
+                    if (apply.to == "sig") {
                         if (rho$p.value < alpha) {  #rho significativa a una confianza del alpha*100(%)
                             a = rho$estimate*(sigma.ref/sigma.em)
                             b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
@@ -208,7 +208,7 @@ calCCR <- function(fcst.grid, obs.grid, newfcst.grid = NULL, crossval = TRUE, ap
                         } else {
                             fcst.cal[,ilat,ilon] = fcst.test + clim.fcst
                         }
-                    } else if (apply.method == "all") {
+                    } else if (apply.to == "all") {
                         a = rho$estimate*(sigma.ref/sigma.em)
                         b = sqrt(1-(rho$estimate^2))*(sigma.ref/sigma.e)
                         
