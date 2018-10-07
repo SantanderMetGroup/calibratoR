@@ -14,6 +14,9 @@
 ## 
 ##     You should have received a copy of the GNU General Public License
 ##     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+##
+
 
 #' @title Inflation calibration method for seasonal forecasts (a.k.a. climate conserving recalibration)
 #' @description This function implements the EMOS method introduced in Doblas-Reyes et al. 2005
