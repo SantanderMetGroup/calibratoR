@@ -19,7 +19,7 @@ install.packages("SpecsVerification")
 ---
 **Reference and further information:**
 
-**[Application to the C3S dataset]** Manzanas et al. (2018) Bias adjustment and ensemble recalibration methods for seasonal forecasting: A comprehensive intercomparison using the C3S dataset. Submitted to Climate Dynamics.
+**[Application to the C3S dataset]** Manzanas et al. (2018) Bias adjustment and ensemble recalibration methods for seasonal forecasting: A comprehensive intercomparison using the C3S dataset. **Climate Dynamics**. https://doi.org/10.1007/s00382-019-04640-4
 
 **[General description of the climate4R framework]** Iturbide et al. (2018) climate4R: An R-based Open Framework for Reproducible Climate Data Access and Post-processing. **Environmental Modelling and Software**. https://doi.org/10.1016/j.envsoft.2018.09.009
 Check out the companion notebooks for the two examples [GitHub](https://github.com/SantanderMetGroup/notebooks).
