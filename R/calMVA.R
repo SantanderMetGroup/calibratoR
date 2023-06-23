@@ -36,6 +36,7 @@
 #' @author R. Manzanas and V. Torralba.
 #' @examples{
 #' ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
+#' require(climate4R.datasets)
 #' data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
 #' data("NCEP_Iberia_tas"); obs = NCEP_Iberia_tas
 #' ## passing from daily data to seasonal averages

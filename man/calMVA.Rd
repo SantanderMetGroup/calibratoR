@@ -25,6 +25,7 @@ It is based on the assumption that both the reference and predicted distribution
 \examples{
 {
 ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
+require(climate4R.datasets)
 data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
 data("NCEP_Iberia_tas"); obs = NCEP_Iberia_tas
 ## passing from daily data to seasonal averages
@@ -51,10 +52,13 @@ spatialPlot(makeMultiGrid(climatology(obs),
 }
 }
 \seealso{
-Other calibration: \code{\link{calCCR}},
-  \code{\link{calLM}}, \code{\link{calNGR}},
-  \code{\link{calRPC}}
+Other calibration: 
+\code{\link{calCCR}()},
+\code{\link{calLM}()},
+\code{\link{calNGR}()},
+\code{\link{calRPC}()}
 }
 \author{
 R. Manzanas and V. Torralba.
 }
+\concept{calibration}

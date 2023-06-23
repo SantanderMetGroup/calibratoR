@@ -1,6 +1,6 @@
 Package: calibratoR
 Depends:
-    R(>= 3.4.0),
+    R(>= 3.5.0),
     transformeR(>= 1.1.0)
 Imports:
     stats,
@@ -10,11 +10,12 @@ Suggests:
     loadeR.ECOMS,    
     visualizeR,
     knitr,
-    rmarkdown
+    rmarkdown,
+    climate4R.datasets
 Type: Package
 Title: An R package for statistical calibration of seasonal climate forecasts
-Version: 0.1.1
-Date: 2018-06-25
+Version: 0.2.0
+Date: 2023-06-23
 Authors@R: as.person(c(
     "Santander Meteorology Group <http://meteo.unican.es> [cph]",
     "Rodrigo Manzanas <rmanzanas@ifca.unican.es> [aut, cre]",
@@ -30,7 +31,7 @@ Description: calibratoR (\url{https://github.com/SantanderMetGroup/calibratoR}) 
  which range from simple mean/variance adjustment to more sophisticated Ensemble Model Output Statistics (EMOS) options which take into account the existing correspondence between 
  the ensemble mean and the observations in the calibration process. It works with the grid object developed for the climate4R bundle (\url{http://www.meteo.unican.es/climate4r}). 
  Currently, only gridded data are supported (point-wise stations will be also supported in a future release).
-License: GPL (>= 3)
+License: file LICENSE
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr

@@ -4,8 +4,13 @@
 \alias{calCCR}
 \title{Inflation calibration method for seasonal forecasts (a.k.a. climate conserving recalibration)}
 \usage{
-calCCR(fcst.grid, obs.grid, crossval = TRUE, apply.to = c("all", "sig"),
-  alpha = 0.1)
+calCCR(
+  fcst.grid,
+  obs.grid,
+  crossval = TRUE,
+  apply.to = c("all", "sig"),
+  alpha = 0.1
+)
 }
 \arguments{
 \item{fcst.grid}{climate4R grid. Forecasts to be calibrated (typically on a monthly/seasonal basis). At the moment, only gridded data are supported.}
@@ -33,6 +38,7 @@ Ensemble Model Output Statistics (EMOS) methods use the correspondence between t
 \examples{
 {
 ## loading seasonal forecasts (CFS) and observations (NCEP) of boreal winter temperature over Iberia
+require(climate4R.datasets)
 data("CFS_Iberia_tas"); fcst = CFS_Iberia_tas
 data("NCEP_Iberia_tas"); obs = NCEP_Iberia_tas
 ## passing from daily data to seasonal averages
@@ -60,10 +66,13 @@ spatialPlot(makeMultiGrid(climatology(obs),
 }
 }
 \seealso{
-Other calibration: \code{\link{calLM}},
-  \code{\link{calMVA}}, \code{\link{calNGR}},
-  \code{\link{calRPC}}
+Other calibration: 
+\code{\link{calLM}()},
+\code{\link{calMVA}()},
+\code{\link{calNGR}()},
+\code{\link{calRPC}()}
 }
 \author{
 R. Manzanas and V. Torralba.
 }
+\concept{calibration}

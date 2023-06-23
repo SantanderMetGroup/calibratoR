@@ -10,3 +10,7 @@
  * `calInflation` has been deprecated, replaced by `calCCR` (Climate Conserving Recalibration)
  * Replace `print` calls by `message`
  * Other minor doc updates
+
+## v0.2.0 (23 Jun 2023) 
+ * Add LICENSE file
+ * Documentation update
